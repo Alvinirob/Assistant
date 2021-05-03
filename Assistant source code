@@ -1,0 +1,65 @@
+import speech_recognition as sr
+import pyttsx3
+import pywhatkit
+import datetime
+import wikipedia
+import pyjokes
+
+listener = sr.Recognizer()
+engine = pyttsx3.init()
+
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)
+
+
+def talk(text):
+    engine.say(text)
+    engine.runAndWait()
+
+
+def take_command():
+    try:
+        with sr.Microphone(device_index=0) as source:
+            listener.adjust_for_ambient_noise(source, duration=1)
+            print('listening...')
+            voice = listener.listen(source)
+            command = listener.recognize_google(voice)
+            command = command.lower()
+            if 'titu' in command:
+                command = command.replace('titu', '')
+                print(command)
+    except:
+        pass
+    return command
+
+
+def run_titu():
+    command = take_command()
+    print(command)
+    if 'play' in command:
+        song = command.replace('play', '')
+        talk('playing ' + song)
+        pywhatkit.playonyt(song)
+    elif 'can you hear me' in command:
+        print('Yes, How can i help you?')
+        talk('Yes, How can i help you?')
+    elif 'time' in command:
+        time = datetime.datetime.now().strftime('%I:%M %p')
+        print('Current time is ' + time)
+        talk('Current time is ' + time)
+    elif 'tell me about' in command:
+        person = command.replace('tell me about ', '')
+        info = wikipedia.summary(person, 1)
+        print(info)
+        talk(info)
+    elif 'thank you' in command:
+        talk('you are welcome')
+    elif 'joke' in command:
+        talk(pyjokes.get_joke())
+    else:
+        talk('I did not know the answer.Please search on Google')
+        pywhatkit.search(command)
+
+
+while True:
+    run_titu()
